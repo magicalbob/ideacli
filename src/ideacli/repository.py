@@ -44,6 +44,12 @@ def init_repo(args):
         print(f"Error initializing repository: {e}")
         return False
 
+def ensure_repo(args):
+    """Ensure the ideas repository is initialized."""
+    if not init_repo(args):
+        print("Error: Could not initialize ideas repository.", file=sys.stderr)
+        sys.exit(1)
+
 def status(args):
     """Check status of the ideas repository"""
     path = args.path if args.path else IDEAS_REPO
