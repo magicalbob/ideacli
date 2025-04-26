@@ -9,3 +9,10 @@ description = "CLI tool for managing LLM conversation ideas"
 readme = "README.md"
 requires-python = ">=3.6"
 license = {text = "GPL-3.0"}
+
+[project.scripts]
+ideacli = "ideacli.cli:main"
+
+[tool.setuptools]
+packages = ["ideacli"]
+package-dir = {"" = "src"}
