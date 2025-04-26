@@ -5,9 +5,12 @@ import subprocess
 # Use relative import
 from .clipboard import copy_to_clipboard
 
+# Default repository location (hidden directory)
+IDEAS_REPO = os.path.join('.', '.ideas_repo')
+
 def init_repo(args):
     """Initialize a new ideas repository"""
-    path = args.path if args.path else "./ideas_repo"
+    path = args.path if args.path else IDEAS_REPO
     
     if os.path.exists(path):
         if not os.path.exists(os.path.join(path, ".git")):
@@ -35,7 +38,6 @@ def init_repo(args):
         
         # Copy success message to clipboard
         success_msg = f"Ideas repository initialized in {path}"
-        copy_to_clipboard(success_msg)
         
         return True
     except Exception as e:
@@ -44,7 +46,7 @@ def init_repo(args):
 
 def status(args):
     """Check status of the ideas repository"""
-    path = args.path if args.path else "./ideas_repo"
+    path = args.path if args.path else IDEAS_REPO
     
     if not os.path.exists(os.path.join(path, ".git")):
         print(f"No ideas repository found at {path}")
@@ -66,9 +68,6 @@ def status(args):
         status_msg += status_output
         
         print(status_msg)
-        
-        # Copy status to clipboard
-        copy_to_clipboard(status_msg)
         
         return True
     except Exception as e:
