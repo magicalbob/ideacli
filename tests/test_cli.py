@@ -105,5 +105,18 @@ class TestCLI(unittest.TestCase):
         args = mock_status.call_args[0][0]
         self.assertEqual(args.path, '/custom/path')
 
+    @patch('argparse.ArgumentParser.parse_args')
+    @patch('src.ideacli.cli.add')
+    def test_add_command(self, mock_add, mock_parse_args):
+        """Test the add command."""
+        mock_args = MagicMock()
+        mock_args.command = "add"
+        mock_parse_args.return_value = mock_args
+        mock_add.return_value = None
+
+        main()
+
+        mock_add.assert_called_once_with(mock_args)
+
 if __name__ == '__main__':
     unittest.main()
