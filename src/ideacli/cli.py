@@ -5,6 +5,7 @@ import sys
 # Use relative import
 from ideacli.repository import init_repo, status
 from ideacli.add import add
+from ideacli.list import list_ideas
 
 def main():
     """Main entry point for the ideacli command."""
@@ -20,6 +21,7 @@ def main():
     status_parser.add_argument("--path", help="Path to the repository")
     add_parser = subparsers.add_parser("add", help="Add a new idea to the repository")
     add_parser.add_argument("--path", help="Path to the repository")
+    list_parser = subparsers.add_parser("list", help="List all ideas")
     
     args = parser.parse_args()
     
@@ -29,6 +31,8 @@ def main():
         status(args)
     elif args.command == "add":
         add(args)
+    elif args.command == "list":
+        list_ideas(args)
     else:
         parser.print_help()
 

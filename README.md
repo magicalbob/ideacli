@@ -57,6 +57,26 @@ ideacli init
 # Check the status of your ideas repository
 ideacli status
 
+# Add a new idea
+ideacli add
+Subject: A big idea
+Body (end with CTRL+D on empty line):
+Do something marvelous.
+Do it today!
+[main 5e23bb5] Add idea: 7a7b3a7d - A big idea
+ 1 file changed, 5 insertions(+)
+ create mode 100644 conversations/7a7b3a7d.json
+Copied to clipboard!
+Idea 'A big idea' saved as 7a7b3a7d and committed.
+
+# List your old ideas
+ideacli list
+[7a7b3a7d] A big idea
+[05ee8e27] Another idea
+[a7ba4d6f] Fourth time around
+[f12e4337] My new idea
+[7a1e34c5] Third idea
+
 # More commands coming soon...
 ```
 
