@@ -7,7 +7,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 # Import the main function
-from src.botcli.cli import main
+from src.ideacli.cli import main
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-"""Repository management functionality for botcli."""
+"""Repository management functionality for ideacli."""
 
 import os
 import subprocess
@@ -25,7 +25,7 @@ def init_repo(args):
         subprocess.run(["git", "init"], cwd=path, check=True)
         # Create initial README
         with open(os.path.join(path, "README.md"), "w") as f:
-            f.write("# LLM Conversations Repository\n\nManaged by idea-cli\n")
+            f.write("# LLM Conversations Repository\n\nManaged by ideacli\n")
         
         # Create initial structure
         os.makedirs(os.path.join(path, "conversations"), exist_ok=True)

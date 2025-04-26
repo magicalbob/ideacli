@@ -1,4 +1,4 @@
-"""Clipboard handling functionality for botcli."""
+"""Clipboard handling functionality for ideacli."""
 
 import platform
 import subprocess

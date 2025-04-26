@@ -1,4 +1,4 @@
-"""Command line interface for botcli."""
+"""Command line interface for ideacli."""
 
 import argparse
 import sys
@@ -6,7 +6,7 @@ import sys
 from .repository import init_repo, status
 
 def main():
-    """Main entry point for the botcli command."""
+    """Main entry point for the ideacli command."""
     parser = argparse.ArgumentParser(description="CLI tool for managing LLM conversation ideas")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
     
