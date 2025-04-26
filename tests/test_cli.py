@@ -19,10 +19,10 @@ class TestCLI(unittest.TestCase):
         mock_args.path = "/test/path"
         mock_parse_args.return_value = mock_args
         mock_init_repo.return_value = True
-        
+
         # Execute
         main()
-        
+
         # Assert
         mock_init_repo.assert_called_once_with(mock_args)
 
@@ -36,10 +36,10 @@ class TestCLI(unittest.TestCase):
         mock_args.path = "/test/path"
         mock_parse_args.return_value = mock_args
         mock_status.return_value = True
-        
+
         # Execute
         main()
-        
+
         # Assert
         mock_status.assert_called_once_with(mock_args)
 
@@ -51,10 +51,10 @@ class TestCLI(unittest.TestCase):
         mock_args = MagicMock()
         mock_args.command = None
         mock_parse_args.return_value = mock_args
-        
+
         # Execute
         main()
-        
+
         # Assert
         mock_print_help.assert_called_once()
 
@@ -63,9 +63,12 @@ class TestCLI(unittest.TestCase):
     def test_no_args(self, mock_print_help):
         """Test when no arguments are provided."""
         # Execute
-        with self.assertRaises(SystemExit):
-            main()
-        
+        main()
+
+        # Assert
+        mock_print_help.assert_called_once()
+
+
         # This test might exit before print_help is called due to argparse behavior
 
     @patch('sys.argv', ['ideacli', 'init', '--path', '/custom/path'])
@@ -74,13 +77,13 @@ class TestCLI(unittest.TestCase):
         """Test init command with path argument."""
         # Setup
         mock_init_repo.return_value = True
-        
+
         # Execute
         try:
             main()
         except SystemExit:
             pass  # Ignore SystemExit that might be raised by argparse
-        
+
         # Assert
         args = mock_init_repo.call_args[0][0]
         self.assertEqual(args.path, '/custom/path')
@@ -91,13 +94,13 @@ class TestCLI(unittest.TestCase):
         """Test status command with path argument."""
         # Setup
         mock_status.return_value = True
-        
+
         # Execute
         try:
             main()
         except SystemExit:
             pass  # Ignore SystemExit that might be raised by argparse
-        
+
         # Assert
         args = mock_status.call_args[0][0]
         self.assertEqual(args.path, '/custom/path')
