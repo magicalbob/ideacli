@@ -8,7 +8,7 @@ from src.ideacli.repository import init_repo, status, IDEAS_REPO
 
 class TestRepository(unittest.TestCase):
     """Test repository functionality."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         self.mock_args = MagicMock()
@@ -19,10 +19,10 @@ class TestRepository(unittest.TestCase):
         """Test init_repo when repo exists and is a git repo."""
         # Setup
         mock_exists.side_effect = [True, True]  # Path exists, .git exists
-        
+
         # Execute
         result = init_repo(self.mock_args)
-        
+
         # Assert
         self.assertTrue(result)
         mock_exists.assert_called_with(os.path.join(IDEAS_REPO, ".git"))
@@ -32,10 +32,10 @@ class TestRepository(unittest.TestCase):
         """Test init_repo when repo exists but is not a git repo."""
         # Setup
         mock_exists.side_effect = [True, False]  # Path exists, .git doesn't exist
-        
+
         # Execute
         result = init_repo(self.mock_args)
-        
+
         # Assert
         self.assertFalse(result)
         mock_exists.assert_called_with(os.path.join(IDEAS_REPO, ".git"))
@@ -48,13 +48,16 @@ class TestRepository(unittest.TestCase):
         """Test init_repo when creating a new repo."""
         # Setup
         mock_exists.side_effect = [False]  # Path doesn't exist
-        
+
         # Execute
         result = init_repo(self.mock_args)
-        
+
         # Assert
         self.assertTrue(result)
-        mock_makedirs.assert_called_once_with(IDEAS_REPO, exist_ok=True)
+        mock_makedirs.assert_has_calls([
+            call(IDEAS_REPO, exist_ok=True),
+            call(os.path.join(IDEAS_REPO, "conversations"), exist_ok=True)
+        ], any_order=True)
         mock_run.assert_has_calls([
             call(["git", "init"], cwd=IDEAS_REPO, check=True),
             call(["git", "add", "."], cwd=IDEAS_REPO, check=True),
@@ -70,10 +73,10 @@ class TestRepository(unittest.TestCase):
         # Setup
         mock_exists.return_value = False
         mock_run.side_effect = Exception("Git error")
-        
+
         # Execute
         result = init_repo(self.mock_args)
-        
+
         # Assert
         self.assertFalse(result)
         mock_makedirs.assert_called_once_with(IDEAS_REPO, exist_ok=True)
@@ -83,10 +86,10 @@ class TestRepository(unittest.TestCase):
         """Test status when no repo exists."""
         # Setup
         mock_exists.return_value = False
-        
+
         # Execute
         result = status(self.mock_args)
-        
+
         # Assert
         self.assertFalse(result)
         mock_exists.assert_called_once_with(os.path.join(IDEAS_REPO, ".git"))
@@ -102,10 +105,10 @@ class TestRepository(unittest.TestCase):
         mock_check_output.return_value = "On branch main\nnothing to commit\n"
         mock_listdir.return_value = ["file1.txt", "file2.txt"]
         mock_abspath.return_value = "/abs/path/.ideas_repo"
-        
+
         # Execute
         result = status(self.mock_args)
-        
+
         # Assert
         self.assertTrue(result)
         mock_exists.assert_called_once_with(os.path.join(IDEAS_REPO, ".git"))
@@ -119,10 +122,10 @@ class TestRepository(unittest.TestCase):
         # Setup
         mock_exists.return_value = True
         mock_check_output.side_effect = Exception("Git error")
-        
+
         # Execute
         result = status(self.mock_args)
-        
+
         # Assert
         self.assertFalse(result)
         mock_exists.assert_called_once_with(os.path.join(IDEAS_REPO, ".git"))
@@ -133,10 +136,10 @@ class TestRepository(unittest.TestCase):
         # Setup
         self.mock_args.path = "/custom/path"
         mock_exists.side_effect = [True, True]  # Path exists, .git exists
-        
+
         # Execute
         result = init_repo(self.mock_args)
-        
+
         # Assert
         self.assertTrue(result)
         mock_exists.assert_has_calls([
