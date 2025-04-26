@@ -3,12 +3,18 @@ import sys
 import json
 import uuid
 import subprocess
-from ideacli.repository import ensure_repo  # helper to init/check repo if needed
+from ideacli.repository import ensure_repo, resolve_idea_path, IDEAS_REPO
 from ideacli.clipboard import copy_to_clipboard  # your existing clipboard utils
-from ideacli.repository import IDEAS_REPO
+from ideacli.repository import resolve_idea_path
 
 def add(args):
-    ensure_repo(args)
+    repo_path = resolve_idea_path(args)
+    
+    # Check that conversations directory exists
+    conversation_dir = os.path.join(repo_path, "conversations")
+    if not os.path.exists(conversation_dir):
+        print(f"Error: ideas repository not found at '{repo_path}'. Did you forget to run 'ideacli init'?", file=sys.stderr)
+        sys.exit(1)
 
     if sys.stdin.isatty():
         # Interactive
@@ -39,7 +45,7 @@ def add(args):
     }
 
     # Write file
-    conversation_dir = os.path.join(IDEAS_REPO, "conversations")
+    conversation_dir = os.path.join(repo_path, "conversations")
     os.makedirs(conversation_dir, exist_ok=True)
 
     idea_path = os.path.join(conversation_dir, f"{idea_id}.json")
@@ -47,8 +53,8 @@ def add(args):
         json.dump(idea, f, indent=2)
 
     # Git commit
-    subprocess.run(["git", "add", "."], cwd=IDEAS_REPO, check=True)
-    subprocess.run(["git", "commit", "-m", f"Add idea: {idea_id} - {subject}"], cwd=IDEAS_REPO, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", f"Add idea: {idea_id} - {subject}"], cwd=repo_path, check=True)
 
     # Clipboard
     copy_to_clipboard(idea_id)
