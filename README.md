@@ -61,7 +61,7 @@ ideacli status
 ```
 
 ## Next Steps
-- Complete the 'add' verb with ID generation
+- ~Complete the 'add' verb with ID generation~
 - Experiment with different ID creation algorithms
 - Implement distance checking between IDs
 - Add support for detecting and parsing JSON input
