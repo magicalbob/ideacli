@@ -1,3 +1,5 @@
+# ideacli - LLM Conversations Manager
+
 ## Core Concept
 - A CLI tool to manage insights and conversations from multiple LLMs
 - Using Git as the backend for version control and storage
@@ -22,6 +24,41 @@
 - Hide implementation details (.ideas_repo)
 - Make complex features optional but available
 - Support command line args to modify behavior (tags, overwrite options)
+
+## Installation
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/magicalbob/ideacli.git
+cd ideacli
+
+# Create and activate a virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install the package in development mode
+pip install -e .
+
+# Now you can run the tool from anywhere
+ideacli --help
+```
+
+### Requirements
+- Python 3.6 or higher
+- Git
+
+## Usage
+```bash
+# Initialize a new ideas repository
+ideacli init
+
+# Check the status of your ideas repository
+ideacli status
+
+# More commands coming soon...
+```
 
 ## Next Steps
 - Complete the 'add' verb with ID generation
