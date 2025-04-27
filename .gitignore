@@ -2,3 +2,4 @@ __pycache__
 .ideas_repo
 src/ideacli.egg-info/
 .coverage
+venv

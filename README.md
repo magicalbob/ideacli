@@ -104,6 +104,14 @@ Let use see the count.
 - Tagging support - add tags come / display tags next to ideas
 - Pagination - --page 1 to show 10 ideas at a time
 - Export - ideacli list --json dumps the list to a JSON array
+- Implement secure sharing infrastructure with end-to-end encryption:
+  - Enable repository sharing via GitHub with built-in encryption
+  - Support "bring your own key" (BYOK) model for user-controlled encryption
+  - Implement key exchange mechanisms for authorized collaborators
+  - Ensure all idea content remains encrypted at rest and in transit
+  - Add granular access controls using GitHub's fine-grained permission system
+  - Create commands for managing shared encrypted repositories
+  - Provide options for local-only keys vs. team-shared encryption keys
 
 ## License
 This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for more details.
