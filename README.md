@@ -101,6 +101,17 @@ Let use see the count.
   - Create views for visualizing agile hierarchies and relationships
   - Support filtering and reporting on agile objects (by type, status, priority)
   - Ensure backward compatibility with standard idea objects
+- Develop REST API and web frontend:
+  - Refactor ideacli to separate core logic from CLI interface
+  - Create a REST API layer (Flask/FastAPI) that uses ideacli's core functions
+  - Design API endpoints that map to ideacli commands (add, show, list, etc.)
+  - Build a web frontend that communicates exclusively through the REST API
+  - Implement Kanban-style board views for visualizing workflow
+  - Add drag-and-drop functionality for status updates
+  - Design dashboard with metrics and reporting capabilities
+  - Support user authentication and permission levels
+  - Ensure real-time updates when multiple users are active
+  - Add API documentation and client SDKs for third-party integrations
 - Experiment with different ID creation algorithms
 - Implement distance checking between IDs
 - Add support for detecting and parsing JSON input
