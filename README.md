@@ -78,7 +78,7 @@ ideacli list
 [7a1e34c5] Third idea
 
 # Show an idea
-ideacli show --id 7a1e34c5 
+ideacli show --id 7a1e34c5
 Subject: Third idea
 
 Body:
@@ -93,14 +93,22 @@ Let use see the count.
 - Add an enquire command. Display the current idea as a JSON object with an extra prompt to tell the LLM what is required. Place the JSON in the paste buffer ready for copying to the chosen LLM(s). (one version of U from CRUD)
 - Add an update command. Take info from the paste buffer and use it to update an idea. This is the stage after an enquire (where the LLM has responded to the enquiry. Implies that as well as the prompt added by the enquire, the enquire should also include context in its JSON output to ensure [as much as one can] that the LLM's reply will include the idea Id). (the second part of the U from CRUD).
 - Add a delete command to delete a particular idea. This could be a hard or sof delete? Either completely removing the idea from .ideas_repo or just marking that it is no longer being pursued?
+- Implement optional agile object types:
+  - Add configuration to enable/disable "agile mode" for a repository
+  - Support agile object types (epic, story, task, subtask) with appropriate metadata
+  - Implement relationship tracking between agile objects (parent/child connections)
+  - Add agile-specific fields like priority, size/points, status, acceptance criteria
+  - Create views for visualizing agile hierarchies and relationships
+  - Support filtering and reporting on agile objects (by type, status, priority)
+  - Ensure backward compatibility with standard idea objects
 - Experiment with different ID creation algorithms
 - Implement distance checking between IDs
 - Add support for detecting and parsing JSON input
 - Consider search capabilities leveraging Git's features
 - Pretty Table - Columnize ID and Subject nicely, align them
-- Sorted by subject	- Allow --sort subject (instead of ID)
-- Show created date	- Read file mtime (os.stat) and show it
-- Full body preview	- Add --long to show the body text under each item
+- Sorted by subject     - Allow --sort subject (instead of ID)
+- Show created date     - Read file mtime (os.stat) and show it
+- Full body preview     - Add --long to show the body text under each item
 - Tagging support - add tags come / display tags next to ideas
 - Pagination - --page 1 to show 10 ideas at a time
 - Export - ideacli list --json dumps the list to a JSON array
