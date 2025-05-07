@@ -113,6 +113,17 @@ A single developer working part-time could complete this POC in approximately 3-
 - Week 3: Create basic web frontend
 - Week 4: Integration testing and refinements
 
+## GitLab Integration Considerations
+
+Given the prevalence of GitLab in enterprise environments, the POC should consider potential integration points:
+
+- Store the ideas repository in GitLab to leverage existing infrastructure
+- Use GitLab authentication for the web interface if possible
+- Design the API with future GitLab integrations in mind
+- Consider how ideacli could complement GitLab Issues
+
+While full GitLab integration is outside the POC scope, designing with these considerations in mind will facilitate future development.
+
 ## Next Steps After POC
 
 Once the POC is validated, development will proceed according to the full roadmap in the README.md, with priorities determined by usage patterns and feedback. Initial post-POC priorities may include:
@@ -121,5 +132,6 @@ Once the POC is validated, development will proceed according to the full roadma
 2. Add LLM integration (enquire/response)
 3. Implement search capabilities
 4. Begin work on agile object types
+5. Develop GitLab integration features
 
 The POC will provide valuable insights to guide these future development efforts.

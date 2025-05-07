@@ -6,6 +6,7 @@
 - A CLI tool to manage insights and conversations from multiple LLMs
 - Using Git as the backend for version control and storage
 - Clipboard integration for cross-LLM compatibility without requiring direct APIs
+- Potential for seamless GitLab integration for enterprise environments
 
 ## Interface Design
 - Simple subject/body format for basic input
