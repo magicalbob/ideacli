@@ -1,5 +1,7 @@
 # ideacli - LLM Conversations Manager
 
+> **Note:** For details on our focused proof-of-concept (POC) approach and implementation plan, please see [POC-APPROACH.md](POC-APPROACH.md).
+
 ## Core Concept
 - A CLI tool to manage insights and conversations from multiple LLMs
 - Using Git as the backend for version control and storage
