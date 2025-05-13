@@ -93,8 +93,8 @@ Let use see the count.
 ## Next Steps
 - ~Complete the 'add' verb with ID generation~
 - ~Add a show command (R from CRUD)~
-- Add an enquire command. Display the current idea as a JSON object with an extra prompt to tell the LLM what is required. Place the JSON in the paste buffer ready for copying to the chosen LLM(s). (one version of U from CRUD)
-- Add an update command. Take info from the paste buffer and use it to update an idea. This is the stage after an enquire (where the LLM has responded to the enquiry. Implies that as well as the prompt added by the enquire, the enquire should also include context in its JSON output to ensure [as much as one can] that the LLM's reply will include the idea Id). (the second part of the U from CRUD).
+- ~Add an enquire command. Display the current idea as a JSON object with an extra prompt to tell the LLM what is required. Place the JSON in the paste buffer ready for copying to the chosen LLM(s). (one version of U from CRUD)~
+- ~Add an update command. Take info from the paste buffer and use it to update an idea. This is the stage after an enquire (where the LLM has responded to the enquiry. Implies that as well as the prompt added by the enquire, the enquire should also include context in its JSON output to ensure [as much as one can] that the LLM's reply will include the idea Id). (the second part of the U from CRUD).~
 - Add a delete command to delete a particular idea. This could be a hard or sof delete? Either completely removing the idea from .ideas_repo or just marking that it is no longer being pursued?
 - Implement optional agile object types:
   - Add configuration to enable/disable "agile mode" for a repository
