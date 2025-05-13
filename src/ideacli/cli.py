@@ -8,6 +8,7 @@ from ideacli.add import add
 from ideacli.list import list_ideas
 from ideacli.show import show_idea
 from ideacli.enquire import enquire
+from ideacli.update import update
 
 def main():
     """Main entry point for the ideacli command."""
@@ -41,6 +42,10 @@ def main():
     enquire_parser.add_argument("--id", help="ID of the idea to enquire about", required=True)
     enquire_parser.add_argument("--prompt", help="Additional prompt for the LLM")
 
+    # Update command
+    update_parser = subparsers.add_parser("update", help="Update an idea using LLM response.")
+    update_parser.add_argument("--id", required=False, help="The ID of the idea. (Only needed if stdin isn't used)")
+
     args = parser.parse_args()
     
     if args.command == "init":
@@ -55,6 +60,8 @@ def main():
         show_idea(args)
     elif args.command == "enquire":
         enquire(args)
+    elif args.command == "update":
+        update(args)
     else:
         parser.print_help()
 
