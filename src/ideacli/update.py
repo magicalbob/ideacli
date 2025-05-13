@@ -1,47 +1,66 @@
-import sys
-import json
-import os
-from ideacli.repository import resolve_idea_path
-from ideacli.clipboard import paste_from_clipboard
+"""Update an existing idea by ID with LLM response."""
 
-def update(args):
-    """Update an existing idea using input from clipboard or stdin."""
+import os
+import json
+import sys
+import subprocess
+from ideacli.repository import resolve_idea_path
+from ideacli.clipboard import paste_from_clipboard  # <- add this import
+
+def update_idea(args):
+    """Update an existing idea with LLM response JSON from stdin or clipboard."""
     repo_path = resolve_idea_path(args)
     conversation_dir = os.path.join(repo_path, "conversations")
+    idea_file = os.path.join(conversation_dir, f"{args.id}.json")
 
-    # Read from stdin if data is piped in, otherwise use clipboard
-    if not sys.stdin.isatty():
-        clipboard_json = sys.stdin.read().strip()
-    else:
-        clipboard_json = paste_from_clipboard()
-
-    if not clipboard_json:
-        print("Error: No valid JSON found in input.", file=sys.stderr)
+    if not os.path.isfile(idea_file):
+        print(f"Error: No conversation found with ID '{args.id}'", file=sys.stderr)
         sys.exit(1)
 
+    # Read input
     try:
-        llm_response = json.loads(clipboard_json)
+        if not sys.stdin.isatty():
+            input_text = sys.stdin.read()
+        else:
+            print("No input piped, reading response from clipboard...")
+            input_text = paste_from_clipboard()
 
-        idea_id = llm_response.get("conversation", {}).get("id") or args.id
-        if not idea_id:
-            print("Error: No idea ID found. Provide it via argument or within JSON input.", file=sys.stderr)
-            sys.exit(1)
+        response_json = json.loads(input_text)
 
-        idea_file = os.path.join(conversation_dir, f"{idea_id}.json")
-        if not os.path.isfile(idea_file):
-            print(f"Error: No conversation found with ID '{idea_id}'", file=sys.stderr)
-            sys.exit(1)
+    except json.JSONDecodeError:
+        print("Error: Input is not valid JSON.", file=sys.stderr)
+        sys.exit(1)
 
+    # Load existing idea
+    try:
         with open(idea_file, "r") as f:
-            existing_data = json.load(f)
+            idea = json.load(f)
+    except Exception as e:
+        print(f"Error reading idea file: {e}", file=sys.stderr)
+        sys.exit(1)
 
-        # Merge new response into existing idea
-        existing_data["response"] = llm_response.get("response", {})
+    # Update response field
+    idea["response"] = response_json
 
+    # Save updated idea
+    try:
         with open(idea_file, "w") as f:
-            json.dump(existing_data, f, indent=2)
+            json.dump(idea, f, indent=2)
 
-        print(f"Successfully updated idea '{idea_id}'.")
+        # Stage changes
+        subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
+
+        # Only commit if there are staged changes
+        result = subprocess.run(["git", "diff", "--staged", "--quiet"], cwd=repo_path)
+        if result.returncode != 0:
+            subprocess.run(
+                ["git", "commit", "-m", f"Update idea: {args.id} with response"],
+                cwd=repo_path,
+                check=True
+            )
+            print(f"Successfully updated idea '{args.id}'.")
+        else:
+            print(f"No changes to update for idea '{args.id}'.")
 
     except Exception as e:
         print(f"Error updating idea: {e}", file=sys.stderr)

@@ -22,8 +22,16 @@ def show_idea(args):
             idea = json.load(f)
 
         print(f"Subject: {idea.get('subject', '(No subject)')}\n")
-        print(f"Body:\n{idea.get('body', '(No body)')}")
+        print(f"Body:\n{idea.get('body', '(No body)')}\n")
+
+        response = idea.get('response')
+        if response:
+            print("Response:")
+            print(json.dumps(response, indent=2))
+        else:
+            print("(No response recorded)")
 
     except Exception as e:
         print(f"Error reading conversation file: {e}", file=sys.stderr)
         sys.exit(1)
+

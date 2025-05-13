@@ -8,7 +8,7 @@ from ideacli.add import add
 from ideacli.list import list_ideas
 from ideacli.show import show_idea
 from ideacli.enquire import enquire
-from ideacli.update import update
+from ideacli.update import update_idea
 
 def main():
     """Main entry point for the ideacli command."""
@@ -61,7 +61,7 @@ def main():
     elif args.command == "enquire":
         enquire(args)
     elif args.command == "update":
-        update(args)
+        update_idea(args)
     else:
         parser.print_help()
 
