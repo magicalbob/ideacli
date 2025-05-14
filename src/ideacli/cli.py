@@ -9,7 +9,7 @@ from ideacli.list import list_ideas
 from ideacli.show import show_idea
 from ideacli.enquire import enquire
 from ideacli.update import update_idea
-from ideacli.files import list_files
+from ideacli.files import list_files, extract_files
 
 def main():
     """Main entry point for the ideacli command."""
@@ -52,6 +52,11 @@ def main():
     files_parser.add_argument("--path", help="Path to the repo")
     files_parser.add_argument("--id", required=True, help="ID of the idea")
 
+    # Extract command
+    extract_parser = subparsers.add_parser("extract", help="Extract code samples into files")
+    extract_parser.add_argument("--path", help="Path to the repo")
+    extract_parser.add_argument("--id", required=True, help="ID of the idea")
+
     args = parser.parse_args()
     
     if args.command == "init":
@@ -70,6 +75,8 @@ def main():
         update_idea(args)
     elif args.command == "files":
         list_files(args)
+    elif args.command == "extract":
+        extract_files(args)
     else:
         parser.print_help()
 
