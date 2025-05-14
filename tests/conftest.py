@@ -1,17 +1,13 @@
-"""pytest configuration file."""
-
-import os
-import sys
 import pytest
 import tempfile
 import shutil
+from unittest.mock import patch
 
-# Add the src directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+@pytest.fixture(autouse=True)
+def isolate_repo_path(monkeypatch):
+    """Redirect IDEAS_REPO operations to a temporary folder during all tests."""
+    temp_dir = tempfile.mkdtemp()
+    monkeypatch.setattr("os.getcwd", lambda: temp_dir)
+    yield
+    shutil.rmtree(temp_dir)
 
-@pytest.fixture
-def temp_dir():
-    """Create a temporary directory for testing."""
-    temp_path = tempfile.mkdtemp()
-    yield temp_path
-    shutil.rmtree(temp_path)
