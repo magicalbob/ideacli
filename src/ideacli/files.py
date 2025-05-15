@@ -18,14 +18,14 @@ def list_files(args):
 
     response = idea.get("response", {})
     files = []
-    
+
     # Check for top-level "files" array first
     if "files" in response:
         for file_entry in response.get("files", []):
             file_name = file_entry.get("name")
             if file_name:
                 files.append(file_name)
-    
+
     # Also check for files in the traditional approach.code_samples structure
     for approach in response.get("approaches", []):
         for sample in approach.get("code_samples", []):
@@ -58,7 +58,7 @@ def extract_files(args):
     for file_entry in response.get("files", []):
         file_name = file_entry.get("name")
         content = file_entry.get("content")
-        
+
         if file_name and content:
             dir_name = os.path.dirname(file_name)
             if dir_name:
@@ -85,6 +85,6 @@ def extract_files(args):
 
                 print(f"Wrote {file_path}")
                 extracted = True
-    
+
     if not extracted:
         print("No files found to extract.")

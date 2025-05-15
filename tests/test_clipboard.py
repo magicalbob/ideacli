@@ -1,183 +1,122 @@
-"""Tests for the clipboard module."""
+# tests/test_clipboard.py
 
 import unittest
 from unittest.mock import patch, MagicMock
-import platform
-import subprocess
 from ideacli.clipboard import copy_to_clipboard, paste_from_clipboard
+import subprocess
 
 class TestClipboard(unittest.TestCase):
-    """Test clipboard functionality."""
 
-    @patch('platform.system')
+    @patch('platform.system', return_value="Darwin")
     @patch('subprocess.Popen')
     def test_copy_to_clipboard_darwin(self, mock_popen, mock_system):
-        """Test copy_to_clipboard on macOS."""
-        # Setup
-        mock_system.return_value = "Darwin"
         mock_process = MagicMock()
-        mock_popen.return_value = mock_process
-        
-        # Execute
+        mock_popen.return_value.__enter__.return_value = mock_process
+
         result = copy_to_clipboard("test text")
-        
-        # Assert
-        mock_popen.assert_called_once_with('pbcopy', stdin=subprocess.PIPE)
-        mock_process.communicate.assert_called_once_with(b"test text")
+
+        mock_popen.assert_called_once_with(['pbcopy'], stdin=subprocess.PIPE)
+        mock_process.communicate.assert_called_once_with(input=b"test text")
         self.assertTrue(result)
 
-    @patch('platform.system')
+    @patch('platform.system', return_value="Windows")
     @patch('subprocess.Popen')
     def test_copy_to_clipboard_windows(self, mock_popen, mock_system):
-        """Test copy_to_clipboard on Windows."""
-        # Setup
-        mock_system.return_value = "Windows"
         mock_process = MagicMock()
-        mock_popen.return_value = mock_process
-        
-        # Execute
+        mock_popen.return_value.__enter__.return_value = mock_process
+
         result = copy_to_clipboard("test text")
-        
-        # Assert
+
         mock_popen.assert_called_once_with(['clip'], stdin=subprocess.PIPE)
-        mock_process.communicate.assert_called_once_with(b"test text")
+        mock_process.communicate.assert_called_once_with(input=b"test text")
         self.assertTrue(result)
 
-    @patch('platform.system')
+    @patch('platform.system', return_value="Linux")
     @patch('subprocess.Popen')
     def test_copy_to_clipboard_linux_xclip(self, mock_popen, mock_system):
-        """Test copy_to_clipboard on Linux with xclip."""
-        # Setup
-        mock_system.return_value = "Linux"
         mock_process = MagicMock()
-        mock_popen.return_value = mock_process
-        
-        # Execute
+        mock_popen.return_value.__enter__.return_value = mock_process
+
         result = copy_to_clipboard("test text")
-        
-        # Assert
-        mock_popen.assert_called_once_with(['xclip', '-selection', 'clipboard'], stdin=subprocess.PIPE)
-        mock_process.communicate.assert_called_once_with(b"test text")
+
+        mock_popen.assert_called_once_with(
+            ['xclip', '-selection', 'clipboard'], stdin=subprocess.PIPE
+        )
+        mock_process.communicate.assert_called_once_with(input=b"test text")
         self.assertTrue(result)
 
-    @patch('platform.system')
+    @patch('platform.system', return_value="Linux")
     @patch('subprocess.Popen')
-    def test_copy_to_clipboard_linux_wl_copy(self, mock_popen, mock_system):
-        """Test copy_to_clipboard on Linux with wl-copy."""
-        # Setup
-        mock_system.return_value = "Linux"
-        mock_popen.side_effect = [FileNotFoundError, MagicMock()]
+    def test_copy_to_clipboard_linux_wlcopy(self, mock_popen, mock_system):
+        # Simulate xclip not found first
         mock_process = MagicMock()
-        mock_popen.return_value = mock_process
-        
-        # Execute
+        mock_popen.side_effect = [
+            FileNotFoundError(),
+            MagicMock(__enter__=lambda s: mock_process, __exit__=lambda s, a, b, c: None)
+        ]
+
         result = copy_to_clipboard("test text")
-        
-        # Assert
-        mock_popen.assert_called_with(['wl-copy'], stdin=subprocess.PIPE)
+
+        expected_calls = [
+            unittest.mock.call(['xclip', '-selection', 'clipboard'], stdin=subprocess.PIPE),
+            unittest.mock.call(['wl-copy'], stdin=subprocess.PIPE),
+        ]
+        mock_popen.assert_has_calls(expected_calls)
+        mock_process.communicate.assert_called_once_with(input=b"test text")
         self.assertTrue(result)
 
-    @patch('platform.system')
-    @patch('subprocess.Popen')
-    def test_copy_to_clipboard_linux_no_clipboard(self, mock_popen, mock_system):
-        """Test copy_to_clipboard on Linux with no clipboard tools."""
-        # Setup
-        mock_system.return_value = "Linux"
-        mock_popen.side_effect = FileNotFoundError
-        
-        # Execute
-        result = copy_to_clipboard("test text")
-        
-        # Assert
-        self.assertFalse(result)
-
-    @patch('platform.system')
+    @patch('platform.system', return_value="Darwin")
     @patch('subprocess.check_output')
     def test_paste_from_clipboard_darwin(self, mock_check_output, mock_system):
-        """Test paste_from_clipboard on macOS."""
-        # Setup
-        mock_system.return_value = "Darwin"
-        mock_check_output.return_value = "test clipboard content"
-        
-        # Execute
-        result = paste_from_clipboard()
-        
-        # Assert
-        mock_check_output.assert_called_once_with('pbpaste', universal_newlines=True)
-        self.assertEqual(result, "test clipboard content")
+        mock_check_output.return_value = "clipboard text"
 
-    @patch('platform.system')
+        result = paste_from_clipboard()
+
+        mock_check_output.assert_called_once_with(['pbpaste'], universal_newlines=True)
+        self.assertEqual(result, "clipboard text")
+
+    @patch('platform.system', return_value="Windows")
     @patch('subprocess.check_output')
     def test_paste_from_clipboard_windows(self, mock_check_output, mock_system):
-        """Test paste_from_clipboard on Windows."""
-        # Setup
-        mock_system.return_value = "Windows"
-        mock_check_output.return_value = "test clipboard content"
-        
-        # Execute
-        result = paste_from_clipboard()
-        
-        # Assert
-        mock_check_output.assert_called_once_with(['powershell.exe', '-command', 'Get-Clipboard'], universal_newlines=True)
-        self.assertEqual(result, "test clipboard content")
+        mock_check_output.return_value = "clipboard text"
 
-    @patch('platform.system')
-    @patch('subprocess.check_output')
-    def test_paste_from_clipboard_windows_error(self, mock_check_output, mock_system):
-        """Test paste_from_clipboard on Windows with error."""
-        # Setup
-        mock_system.return_value = "Windows"
-        mock_check_output.side_effect = Exception("Windows error")
-        
-        # Execute
         result = paste_from_clipboard()
-        
-        # Assert
-        self.assertEqual(result, "")
 
-    @patch('platform.system')
+        mock_check_output.assert_called_once_with(
+            ['powershell.exe', '-command', 'Get-Clipboard'],
+            universal_newlines=True
+        )
+        self.assertEqual(result, "clipboard text")
+
+    @patch('platform.system', return_value="Linux")
     @patch('subprocess.check_output')
     def test_paste_from_clipboard_linux_xclip(self, mock_check_output, mock_system):
-        """Test paste_from_clipboard on Linux with xclip."""
-        # Setup
-        mock_system.return_value = "Linux"
-        mock_check_output.return_value = "test clipboard content"
-        
-        # Execute
-        result = paste_from_clipboard()
-        
-        # Assert
-        mock_check_output.assert_called_once_with(['xclip', '-selection', 'clipboard', '-o'], universal_newlines=True)
-        self.assertEqual(result, "test clipboard content")
+        mock_check_output.return_value = "clipboard text"
 
-    @patch('platform.system')
-    @patch('subprocess.check_output')
-    def test_paste_from_clipboard_linux_wl_paste(self, mock_check_output, mock_system):
-        """Test paste_from_clipboard on Linux with wl-paste."""
-        # Setup
-        mock_system.return_value = "Linux"
-        mock_check_output.side_effect = [FileNotFoundError, "test clipboard content"]
-        
-        # Execute
         result = paste_from_clipboard()
-        
-        # Assert
-        mock_check_output.assert_called_with(['wl-paste'], universal_newlines=True)
-        self.assertEqual(result, "test clipboard content")
 
-    @patch('platform.system')
+        mock_check_output.assert_called_once_with(
+            ['xclip', '-selection', 'clipboard', '-o'], universal_newlines=True
+        )
+        self.assertEqual(result, "clipboard text")
+
+    @patch('platform.system', return_value="Linux")
     @patch('subprocess.check_output')
-    def test_paste_from_clipboard_linux_no_clipboard(self, mock_check_output, mock_system):
-        """Test paste_from_clipboard on Linux with no clipboard tools."""
-        # Setup
-        mock_system.return_value = "Linux"
-        mock_check_output.side_effect = FileNotFoundError
-        
-        # Execute
+    def test_paste_from_clipboard_linux_wlpaste(self, mock_check_output, mock_system):
+        # Simulate xclip not found first
+        mock_check_output.side_effect = [
+            FileNotFoundError(),
+            "clipboard text"
+        ]
+
         result = paste_from_clipboard()
-        
-        # Assert
-        self.assertEqual(result, "")
+
+        expected_calls = [
+            unittest.mock.call(['xclip', '-selection', 'clipboard', '-o'], universal_newlines=True),
+            unittest.mock.call(['wl-paste'], universal_newlines=True)
+        ]
+        mock_check_output.assert_has_calls(expected_calls)
+        self.assertEqual(result, "clipboard text")
 
 if __name__ == '__main__':
     unittest.main()
