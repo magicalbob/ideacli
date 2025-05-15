@@ -5,7 +5,7 @@ import json
 import sys
 import subprocess
 from ideacli.repository import resolve_idea_path
-from ideacli.clipboard import paste_from_clipboard  # <- add this import
+from ideacli.clipboard import paste_from_clipboard
 
 def update_idea(args):
     """Update an existing idea with LLM response JSON from stdin or clipboard."""
@@ -25,6 +25,16 @@ def update_idea(args):
             print("No input piped, reading response from clipboard...")
             input_text = paste_from_clipboard()
 
+        # Clean up any markdown style code fences
+        input_text = input_text.strip()
+        if input_text.startswith("```json"):
+            input_text = input_text[7:]
+        elif input_text.startswith("```"):
+            input_text = input_text[3:]
+        if input_text.endswith("```"):
+            input_text = input_text[:-3]
+        input_text = input_text.strip()
+
         response_json = json.loads(input_text)
 
     except json.JSONDecodeError:
@@ -33,7 +43,7 @@ def update_idea(args):
 
     # Load existing idea
     try:
-        with open(idea_file, "r") as f:
+        with open(idea_file, "r", encoding="utf-8") as f:
             idea = json.load(f)
     except Exception as e:
         print(f"Error reading idea file: {e}", file=sys.stderr)
@@ -44,7 +54,7 @@ def update_idea(args):
 
     # Save updated idea
     try:
-        with open(idea_file, "w") as f:
+        with open(idea_file, "w", encoding="utf-8") as f:
             json.dump(idea, f, indent=2)
 
         # Stage changes
