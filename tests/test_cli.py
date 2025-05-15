@@ -4,13 +4,13 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 import argparse
-from src.ideacli.cli import main
+from ideacli.cli import main
 
 class TestCLI(unittest.TestCase):
     """Test CLI functionality."""
 
     @patch('argparse.ArgumentParser.parse_args')
-    @patch('src.ideacli.cli.init_repo')
+    @patch('ideacli.cli.init_repo')
     def test_init_command(self, mock_init_repo, mock_parse_args):
         """Test the init command."""
         # Setup
@@ -27,7 +27,7 @@ class TestCLI(unittest.TestCase):
         mock_init_repo.assert_called_once_with(mock_args)
 
     @patch('argparse.ArgumentParser.parse_args')
-    @patch('src.ideacli.cli.status')
+    @patch('ideacli.cli.status')
     def test_status_command(self, mock_status, mock_parse_args):
         """Test the status command."""
         # Setup
@@ -72,7 +72,7 @@ class TestCLI(unittest.TestCase):
         # This test might exit before print_help is called due to argparse behavior
 
     @patch('sys.argv', ['ideacli', 'init', '--path', '/custom/path'])
-    @patch('src.ideacli.cli.init_repo')
+    @patch('ideacli.cli.init_repo')
     def test_init_with_path_arg(self, mock_init_repo):
         """Test init command with path argument."""
         # Setup
@@ -89,7 +89,7 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(args.path, '/custom/path')
 
     @patch('sys.argv', ['ideacli', 'status', '--path', '/custom/path'])
-    @patch('src.ideacli.cli.status')
+    @patch('ideacli.cli.status')
     def test_status_with_path_arg(self, mock_status):
         """Test status command with path argument."""
         # Setup
@@ -106,7 +106,7 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(args.path, '/custom/path')
 
     @patch('argparse.ArgumentParser.parse_args')
-    @patch('src.ideacli.cli.add')
+    @patch('ideacli.cli.add')
     def test_add_command(self, mock_add, mock_parse_args):
         """Test the add command."""
         mock_args = MagicMock()

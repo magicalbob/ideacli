@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import platform
 import subprocess
-from src.ideacli.clipboard import copy_to_clipboard, paste_from_clipboard
+from ideacli.clipboard import copy_to_clipboard, paste_from_clipboard
 
 class TestClipboard(unittest.TestCase):
     """Test clipboard functionality."""
