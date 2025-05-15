@@ -9,6 +9,7 @@ from ideacli.show import show_idea
 from ideacli.enquire import enquire
 from ideacli.update import update_idea
 from ideacli.files import list_files, extract_files
+from ideacli.rename import rename_idea
 
 def main():
     """Main entry point for the ideacli command."""
@@ -60,6 +61,12 @@ def main():
     extract_parser.add_argument("--path", help="Path to the repo")
     extract_parser.add_argument("--id", required=True, help="ID of the idea")
 
+    # Rename command
+    rename_parser = subparsers.add_parser("rename", help="Rename the subject of an idea by ID")
+    rename_parser.add_argument("--path", help="Path to the repository")
+    rename_parser.add_argument("--id", required=True, help="ID of the idea to rename")
+    rename_parser.add_argument("--target", required=True, help="New subject/title for the idea")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -80,6 +87,8 @@ def main():
         list_files(args)
     elif args.command == "extract":
         extract_files(args)
+    elif args.command == "rename":
+        rename_idea(args)
     else:
         parser.print_help()
 
