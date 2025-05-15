@@ -27,7 +27,7 @@ def main():
     add_parser = subparsers.add_parser("add", help="Add a new idea to the repository")
     add_parser.add_argument("--path", help="Path to the repository")
 
-    #List command
+    # List command
     list_parser = subparsers.add_parser("list", help="List all ideas")
     list_parser.add_argument("--path", help="Path to the repository")
 
@@ -35,6 +35,7 @@ def main():
     show_parser = subparsers.add_parser("show", help="Show a specific idea by ID")
     show_parser.add_argument("--path", help="Path to the repository")
     show_parser.add_argument("--id", help="ID of the idea to show")
+
     # Enquire command
     enquire_parser = subparsers.add_parser("enquire",
                                            help="Prepare an idea with prompt for LLM input")

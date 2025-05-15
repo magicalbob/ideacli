@@ -5,7 +5,6 @@ import uuid
 import subprocess
 from ideacli.repository import ensure_repo, resolve_idea_path, IDEAS_REPO
 from ideacli.clipboard import copy_to_clipboard  # your existing clipboard utils
-from ideacli.repository import resolve_idea_path
 
 ERROR_REPO_NOT_FOUND = "Error: ideas repository not found at '{}'. Forget to run 'ideacli init'?"
 
