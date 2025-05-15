@@ -45,6 +45,7 @@ def main():
 
     # Update command
     update_parser = subparsers.add_parser("update", help="Update an idea using LLM response.")
+    update_parser.add_argument("--path", help="Path to the repository")
     update_parser.add_argument("--id",
                                required=False,
                                help="The ID of the idea. (Only needed if stdin isn't used)")
