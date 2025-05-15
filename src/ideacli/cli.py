@@ -13,6 +13,34 @@ from ideacli.rename import rename_idea
 
 def main():
     """Main entry point for the ideacli command."""
+    parser = create_parser()
+    args = parser.parse_args()
+
+    if args.command == "init":
+        init_repo(args)
+    elif args.command == "status":
+        status(args)
+    elif args.command == "add":
+        add(args)
+    elif args.command == "list":
+        list_ideas(args)
+    elif args.command == "show":
+        show_idea(args)
+    elif args.command == "enquire":
+        enquire(args)
+    elif args.command == "update":
+        update_idea(args)
+    elif args.command == "files":
+        list_files(args)
+    elif args.command == "extract":
+        extract_files(args)
+    elif args.command == "rename":
+        rename_idea(args)
+    else:
+        parser.print_help()
+
+def create_parser():
+    """Creates and returns the argparse parser."""
     parser = argparse.ArgumentParser(description="CLI tool for managing LLM conversation ideas")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
@@ -67,30 +95,7 @@ def main():
     rename_parser.add_argument("--id", required=True, help="ID of the idea to rename")
     rename_parser.add_argument("--target", required=True, help="New subject/title for the idea")
 
-    args = parser.parse_args()
-
-    if args.command == "init":
-        init_repo(args)
-    elif args.command == "status":
-        status(args)
-    elif args.command == "add":
-        add(args)
-    elif args.command == "list":
-        list_ideas(args)
-    elif args.command == "show":
-        show_idea(args)
-    elif args.command == "enquire":
-        enquire(args)
-    elif args.command == "update":
-        update_idea(args)
-    elif args.command == "files":
-        list_files(args)
-    elif args.command == "extract":
-        extract_files(args)
-    elif args.command == "rename":
-        rename_idea(args)
-    else:
-        parser.print_help()
+    return parser
 
 if __name__ == "__main__":
     main()
