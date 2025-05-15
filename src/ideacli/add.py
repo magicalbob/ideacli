@@ -1,14 +1,17 @@
+"""Add a new idea to the ideas repository."""
+
 import os
 import sys
 import json
 import uuid
 import subprocess
-from ideacli.repository import ensure_repo, resolve_idea_path, IDEAS_REPO
-from ideacli.clipboard import copy_to_clipboard  # your existing clipboard utils
+from ideacli.repository import resolve_idea_path
+from ideacli.clipboard import copy_to_clipboard
 
 ERROR_REPO_NOT_FOUND = "Error: ideas repository not found at '{}'. Forget to run 'ideacli init'?"
 
 def add(args):
+    """Add by prompting user/reading piped input, saves, commits & copies ID to clipboard."""
     repo_path = resolve_idea_path(args)
 
     # Check that conversations directory exists
@@ -36,7 +39,7 @@ def add(args):
         sys.exit(1)
 
     # Create unique random ID
-    idea_id = str(uuid.uuid4())[:8]  # Short UUID, can tweak this
+    idea_id = str(uuid.uuid4())[:8]  # Short UUID
 
     # Prepare JSON
     idea = {
@@ -48,22 +51,18 @@ def add(args):
     # Write file
     conversation_dir = os.path.join(repo_path, "conversations")
     os.makedirs(conversation_dir, exist_ok=True)
-
     idea_path = os.path.join(conversation_dir, f"{idea_id}.json")
-    with open(idea_path, "w") as f:
+    with open(idea_path, "w", encoding="utf-8") as f:
         json.dump(idea, f, indent=2)
 
     # Git commit
     subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
-    subprocess.run(["git",
-                    "commit",
-                    "-m",
-                    f"Add idea: {idea_id} - {subject}"
-                   ],
-                   cwd=repo_path,
-                   check=True)
+    subprocess.run(
+        ["git", "commit", "-m", f"Add idea: {idea_id} - {subject}"],
+        cwd=repo_path,
+        check=True
+    )
 
     # Clipboard
     copy_to_clipboard(idea_id)
-
     print(f"Idea '{subject}' saved as {idea_id} and committed.")
