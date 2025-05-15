@@ -1,14 +1,21 @@
-[build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "ideacli"
 version = "0.1.0"
 description = "CLI tool for managing LLM conversation ideas"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 license = {text = "GPL-3.0"}
+dependencies = [
+    "setuptools>=80",   # runtime safety for newer versions
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.1",
+    "coverage>=7.8",
+    "pylint>=3.3.7"
+]
 
 [project.scripts]
 ideacli = "ideacli.cli:main"

@@ -50,9 +50,9 @@ def extract_files(args):
                 dir_name = os.path.dirname(file_path)
                 if dir_name:  # <-- ⭐ ⭐ ⭐ this prevents the crash
                     os.makedirs(dir_name, exist_ok=True)
-    
+
                 with open(file_path, "w") as out_file:
                     out_file.write(code)
-    
+
                 print(f"Wrote {file_path}")
 

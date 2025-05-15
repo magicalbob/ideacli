@@ -1,7 +1,6 @@
 """Command line interface for ideacli."""
 
 import argparse
-import sys
 # Use relative import
 from ideacli.repository import init_repo, status
 from ideacli.add import add
@@ -15,11 +14,11 @@ def main():
     """Main entry point for the ideacli command."""
     parser = argparse.ArgumentParser(description="CLI tool for managing LLM conversation ideas")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
-    
+
     # Init command
     init_parser = subparsers.add_parser("init", help="Initialize a new ideas repository")
     init_parser.add_argument("--path", help="Path for the new repository")
-    
+
     # Status command
     status_parser = subparsers.add_parser("status", help="Check status of ideas repository")
     status_parser.add_argument("--path", help="Path to the repository")
@@ -31,13 +30,13 @@ def main():
     #List command
     list_parser = subparsers.add_parser("list", help="List all ideas")
     list_parser.add_argument("--path", help="Path to the repository")
-    
+
     # Show command
     show_parser = subparsers.add_parser("show", help="Show a specific idea by ID")
     show_parser.add_argument("--path", help="Path to the repository")
     show_parser.add_argument("--id", help="ID of the idea to show")
     # Enquire command
-    enquire_parser = subparsers.add_parser("enquire", 
+    enquire_parser = subparsers.add_parser("enquire",
                                            help="Prepare an idea with prompt for LLM input")
     enquire_parser.add_argument("--path", help="Path to the repository")
     enquire_parser.add_argument("--id", help="ID of the idea to enquire about", required=True)
@@ -45,7 +44,9 @@ def main():
 
     # Update command
     update_parser = subparsers.add_parser("update", help="Update an idea using LLM response.")
-    update_parser.add_argument("--id", required=False, help="The ID of the idea. (Only needed if stdin isn't used)")
+    update_parser.add_argument("--id",
+                               required=False,
+                               help="The ID of the idea. (Only needed if stdin isn't used)")
 
     # Files command
     files_parser = subparsers.add_parser("files", help="List code files suggested in response")
@@ -58,7 +59,7 @@ def main():
     extract_parser.add_argument("--id", required=True, help="ID of the idea")
 
     args = parser.parse_args()
-    
+
     if args.command == "init":
         init_repo(args)
     elif args.command == "status":
