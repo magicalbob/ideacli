@@ -26,28 +26,34 @@ def ensure_repo(args):
     return resolve_idea_path(args)
 
 def init_repo(args):
-    """Initialize a new ideas repository."""
-    base_path = resolve_repo_root(args)
-    repo_path = os.path.join(base_path, IDEAS_REPO)
+    """Initialize a new ideas repository"""
+    path = args.path if args.path else IDEAS_REPO
 
-    if not os.path.exists(repo_path):
-        os.makedirs(repo_path)
-    elif not os.path.isdir(repo_path):
-        print(f"Error: '{repo_path}' exists but is not a directory.", file=sys.stderr)
-        return False
-
-    git_dir = os.path.join(repo_path, ".git")
-    if not os.path.exists(git_dir):
-        try:
-            subprocess.check_call(["git", "init"], cwd=repo_path)
-            subprocess.check_call(["git", "add", "."], cwd=repo_path)
-            subprocess.check_call(["git", "commit", "-m", "Initial commit"], cwd=repo_path)
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"Git initialization failed: {e}", file=sys.stderr)
+    if os.path.exists(path):
+        if not os.path.exists(os.path.join(path, ".git")):
+            print(f"Directory {path} exists but is not a git repository.")
             return False
-    else:
-        print(f"Directory {repo_path} exists but is not a git repository.", file=sys.stderr)
+        else:
+            print(f"Repository already exists at {path}")
+            return True
+
+    try:
+        os.makedirs(path, exist_ok=True)
+        subprocess.run(["git", "init"], cwd=path, check=True)
+
+        # ✅ Add back these two lines:
+        os.makedirs(os.path.join(path, "conversations"), exist_ok=True)
+        with open(os.path.join(path, "README.md"), "w", encoding="utf-8") as f:
+            f.write("# LLM Conversations Repository\n\nManaged by ideacli\n")
+
+        subprocess.run(["git", "add", "."], cwd=path, check=True)
+        subprocess.run(["git", "commit", "-m", "Initial repository structure"], cwd=path, check=True)
+
+        print(f"Initialized new ideas repository in {path}")
+        return True
+
+    except Exception as e:
+        print(f"Error initializing repository: {e}")
         return False
 
 def status(args):
