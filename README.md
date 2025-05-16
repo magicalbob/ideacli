@@ -48,6 +48,11 @@ pip install -e .
 ideacli --help
 ```
 
+or alternatively just install one of the releases:
+```bash
+pip install git+https://github.com/magicalbob/ideacli@v0.1.1
+```
+
 ### Requirements
 - Python 3.6 or higher
 - Git
