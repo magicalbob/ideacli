@@ -20,4 +20,4 @@ jobs:
         tags: ideacli:latest
     
     - name: Analysing the code with pylint
-      run: docker run ideacli:latest pylint src
+      run: docker run ideacli:latest pylint --fail-under=9.5 src
