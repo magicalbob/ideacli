@@ -42,7 +42,15 @@ def update_idea(args):
         else:
             # Try to get JSON from clipboard
             clipboard_content = pyperclip.paste()
+            print(f"Got clipboard content of length: {len(clipboard_content)}")
+            print(f"Clipboard first 100 characters: {clipboard_content[:100]}")
             new_data = json.loads(clipboard_content)
+            print("Successfully parsed JSON from clipboard")
+            print(f"Keys in new_data: {list(new_data.keys())}")
+            if 'files' in new_data:
+                print(f"Found 'files' key with {len(new_data['files'])} entries")
+                for file_name in new_data['files']:
+                    print(f"  - {file_name}")
     except Exception as e:
         print(f"Error: Could not parse JSON: {e}")
         sys.exit(1)

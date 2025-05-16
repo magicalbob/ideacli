@@ -19,28 +19,19 @@ def list_files(args):
     response = idea.get("response", {})
     files = []
 
-    # Check if "files" exists directly in the response
+    # First, check for files in response
     if "files" in response:
-        files_data = response.get("files", {})
-        # Check if files is a dictionary (keys as filenames)
+        files_data = response["files"]
         if isinstance(files_data, dict):
-            for filename, content in files_data.items():
+            for filename in files_data.keys():
                 files.append(filename)
-        # Check if files is a list of objects with "name" field
-        elif isinstance(files_data, list):
-            for file_entry in files_data:
-                if isinstance(file_entry, dict):
-                    file_name = file_entry.get("name")
-                    if file_name:
-                        files.append(file_name)
 
-    # Also check traditional approach.code_samples format
-    for approach in response.get("approaches", []):
-        if isinstance(approach, dict):  # Handle approach as dictionary
-            for sample in approach.get("code_samples", []):
-                file_name = sample.get("file")
-                if file_name and file_name not in files:
-                    files.append(file_name)
+    # ALSO check for files at the root level (this is the key addition)
+    if "files" in idea:
+        files_data = idea["files"]
+        if isinstance(files_data, dict):
+            for filename in files_data.keys():
+                files.append(filename)
 
     if files:
         print("\n".join(files))
@@ -63,10 +54,9 @@ def extract_files(args):
     response = idea.get("response", {})
     extracted = False
 
-    # Check if "files" exists directly in the response
+    # Process files from the "files" field in response
     if "files" in response:
         files_data = response.get("files", {})
-        # Check if files is a dictionary (keys as filenames)
         if isinstance(files_data, dict):
             for filename, content in files_data.items():
                 dir_name = os.path.dirname(filename)
@@ -78,7 +68,6 @@ def extract_files(args):
 
                 print(f"Wrote {filename}")
                 extracted = True
-        # Check if files is a list of objects with "name" and "content" fields
         elif isinstance(files_data, list):
             for file_entry in files_data:
                 if isinstance(file_entry, dict):
@@ -95,9 +84,39 @@ def extract_files(args):
                         print(f"Wrote {file_name}")
                         extracted = True
 
-    # Also handle the traditional approach.code_samples format
+    # NEW: Also process files from the root level "files" field
+    if "files" in idea:
+        files_data = idea.get("files", {})
+        if isinstance(files_data, dict):
+            for filename, content in files_data.items():
+                dir_name = os.path.dirname(filename)
+                if dir_name:
+                    os.makedirs(dir_name, exist_ok=True)
+
+                with open(filename, "w") as out_file:
+                    out_file.write(content)
+
+                print(f"Wrote {filename}")
+                extracted = True
+        elif isinstance(files_data, list):
+            for file_entry in files_data:
+                if isinstance(file_entry, dict):
+                    file_name = file_entry.get("name")
+                    content = file_entry.get("content")
+                    if file_name and content:
+                        dir_name = os.path.dirname(file_name)
+                        if dir_name:
+                            os.makedirs(dir_name, exist_ok=True)
+
+                        with open(file_name, "w") as out_file:
+                            out_file.write(content)
+
+                        print(f"Wrote {file_name}")
+                        extracted = True
+
+    # Handle the traditional approach.code_samples format
     for approach in response.get("approaches", []):
-        if isinstance(approach, dict):  # Handle approach as dictionary
+        if isinstance(approach, dict):
             for sample in approach.get("code_samples", []):
                 file_path = sample.get("file")
                 code = sample.get("code")

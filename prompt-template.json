@@ -1,0 +1,22 @@
+{
+  "format_instructions": {
+    "description": "Please respond ONLY with a valid JSON object in the exact structure shown below. Your response should contain actual JSON files for each of the requested topics.",
+    "expected_structure": {
+      "approaches": {
+        "description": "Approach methodology for creating the requested files"
+      },
+      "files": {
+        "chaos_testing_story.json": "{\"title\": \"Chaos Testing Story\", \"content\": \"...\"}",
+        "chaos_testing_approach.json": "{\"title\": \"Chaos Testing Approach\", \"content\": \"...\"}",
+        "chaos_testing_tooling.json": "{\"title\": \"Chaos Testing Tooling\", \"content\": \"...\"}"
+      },
+      "conclusion": "Summary of the provided files"
+    },
+    "important_notes": [
+      "Your entire response must be a valid JSON object",
+      "The 'files' property must include a file for each requested topic",
+      "Each file must have a proper .json extension and contain valid, escaped JSON content",
+      "Do not include any text outside the JSON structure"
+    ]
+  }
+}
