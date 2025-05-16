@@ -1,4 +1,7 @@
-"""Update mechanism for ideacli: merges JSON updates, supports clipboard, and preserves/merges 'files'."""
+"""
+Update mechanism for ideacli: merges JSON updates, supports clipboard,
+and preserves/merges 'files'.
+"""
 
 import json
 import os
