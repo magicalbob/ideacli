@@ -1,6 +1,6 @@
 [project]
 name = "ideacli"
-version = "0.1.0"
+version = "0.1.1"
 description = "CLI tool for managing LLM conversation ideas"
 readme = "README.md"
 requires-python = ">=3.8"
