@@ -1,77 +1,128 @@
-"""Update an existing idea by ID with LLM response."""
+# Modified update mechanism for ideacli
 
-import os
 import json
+import os
 import sys
-import subprocess
+import pyperclip
 from ideacli.repository import resolve_idea_path
-from ideacli.clipboard import paste_from_clipboard
+
+def deep_update(original, update):
+    """
+    Recursively update a dictionary.
+    For dictionaries, this performs a deep update.
+    For other types, it replaces the value.
+    """
+    for key, value in update.items():
+        if key in original and isinstance(original[key], dict) and isinstance(value, dict):
+            deep_update(original[key], value)
+        else:
+            original[key] = value
 
 def update_idea(args):
-    """Update an existing idea with LLM response JSON from stdin or clipboard."""
+    """
+    Update an idea with new JSON content.
+    Special handling for 'files' to merge them instead of replacing.
+    """
     repo_path = resolve_idea_path(args)
     conversation_dir = os.path.join(repo_path, "conversations")
-    idea_file = os.path.join(conversation_dir, f"{args.id}.json")
-
-    if not os.path.isfile(idea_file):
-        print(f"Error: No conversation found with ID '{args.id}'", file=sys.stderr)
-        sys.exit(1)
-
-    # Read input
+    os.makedirs(conversation_dir, exist_ok=True)
+    conversation_file = os.path.join(conversation_dir, f"{args.id}.json")
+    
+    # If the file exists, read it first
+    if os.path.exists(conversation_file):
+        with open(conversation_file, "r") as f:
+            existing_data = json.load(f)
+    else:
+        existing_data = {"id": args.id}
+    
+    # Read the new data
     try:
-        if not sys.stdin.isatty():
-            input_text = sys.stdin.read()
+        if hasattr(args, 'json'):
+            new_data = json.loads(args.json)
         else:
-            print("No input piped, reading response from clipboard...")
-            input_text = paste_from_clipboard()
-
-        # Clean up any markdown style code fences
-        input_text = input_text.strip()
-        if input_text.startswith("```json"):
-            input_text = input_text[7:]
-        elif input_text.startswith("```"):
-            input_text = input_text[3:]
-        if input_text.endswith("```"):
-            input_text = input_text[:-3]
-        input_text = input_text.strip()
-
-        response_json = json.loads(input_text)
-
-    except json.JSONDecodeError:
-        print("Error: Input is not valid JSON.", file=sys.stderr)
-        sys.exit(1)
-
-    # Load existing idea
-    try:
-        with open(idea_file, "r", encoding="utf-8") as f:
-            idea = json.load(f)
+            # Try to get JSON from clipboard
+            clipboard_content = pyperclip.paste()
+            new_data = json.loads(clipboard_content)
     except Exception as e:
-        print(f"Error reading idea file: {e}", file=sys.stderr)
+        print(f"Error: Could not parse JSON: {e}")
         sys.exit(1)
-
-    # Update response field
-    idea["response"] = response_json
-
-    # Save updated idea
-    try:
-        with open(idea_file, "w", encoding="utf-8") as f:
-            json.dump(idea, f, indent=2)
-
-        # Stage changes
-        subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
-
-        # Only commit if there are staged changes
-        result = subprocess.run(["git", "diff", "--staged", "--quiet"], cwd=repo_path)
-        if result.returncode != 0:
-            subprocess.run(
-                ["git", "commit", "-m", f"Update idea: {args.id} with response"],
-                cwd=repo_path,
-                check=True
-            )
-            print(f"Successfully updated idea '{args.id}'.")
+    
+    # Preserve the ID field
+    new_data["id"] = args.id
+    
+    # Special handling for the 'files' field in the response - merge instead of replace
+    if 'response' in new_data and 'files' in new_data['response']:
+        # Ensure response exists in existing_data
+        if 'response' not in existing_data:
+            existing_data['response'] = {}
+        
+        # Handle both dictionary and list formats for files
+        if 'files' not in existing_data['response']:
+            # If no files exist yet, just copy the new files as is
+            existing_data['response']['files'] = new_data['response']['files']
         else:
-            print(f"No changes to update for idea '{args.id}'.")
-
-    except Exception as e:
-        print(f"Error updating idea: {e}", file=sys.stderr)
-        sys.exit(1)
+            # Files exist in both. Need to merge them
+            existing_files = existing_data['response']['files']
+            new_files = new_data['response']['files']
+            
+            # Handle dictionary format (key-value pairs)
+            if isinstance(existing_files, dict) and isinstance(new_files, dict):
+                existing_files.update(new_files)
+            # Handle list format (array of objects)
+            elif isinstance(existing_files, list) and isinstance(new_files, list):
+                # Create a map of existing files by name
+                existing_files_map = {f.get('name'): f for f in existing_files if isinstance(f, dict) and 'name' in f}
+                
+                # Update existing files or add new ones
+                for new_file in new_files:
+                    if isinstance(new_file, dict) and 'name' in new_file:
+                        existing_files_map[new_file['name']] = new_file
+                
+                # Convert back to list
+                existing_data['response']['files'] = list(existing_files_map.values())
+            # Handle different formats (one is dict, other is list)
+            else:
+                # Just use the new format, but try to preserve all files
+                if isinstance(existing_files, dict) and isinstance(new_files, list):
+                    # Convert existing dict to list format
+                    converted_files = []
+                    for name, content in existing_files.items():
+                        converted_files.append({"name": name, "content": content})
+                    
+                    # Create a map of files by name
+                    files_map = {f.get('name'): f for f in converted_files + new_files if isinstance(f, dict) and 'name' in f}
+                    existing_data['response']['files'] = list(files_map.values())
+                    
+                elif isinstance(existing_files, list) and isinstance(new_files, dict):
+                    # Convert new dict to list format and merge
+                    converted_files = []
+                    for name, content in new_files.items():
+                        converted_files.append({"name": name, "content": content})
+                    
+                    # Create a map of files by name
+                    files_map = {f.get('name'): f for f in existing_files if isinstance(f, dict) and 'name' in f}
+                    
+                    # Update with new files
+                    for new_file in converted_files:
+                        if 'name' in new_file:
+                            files_map[new_file['name']] = new_file
+                    
+                    existing_data['response']['files'] = list(files_map.values())
+        
+        # Remove 'files' from new_data to prevent overwrite in the next step
+        del new_data['response']['files']
+    
+    # Preserve the existing 'subject' and 'body' if they're not in the new data
+    if 'subject' in existing_data and 'subject' not in new_data:
+        new_data['subject'] = existing_data['subject']
+    if 'body' in existing_data and 'body' not in new_data:
+        new_data['body'] = existing_data['body']
+    
+    # Update the existing data with new data (except for already handled 'files')
+    deep_update(existing_data, new_data)
+    
+    # Write back to file
+    with open(conversation_file, "w") as f:
+        json.dump(existing_data, f, indent=2)
+    
+    print(f"Updated idea {args.id}")
