@@ -12,7 +12,10 @@ def rename_idea(args):
     idea_file = os.path.join(conversation_dir, f"{args.id}.json")
 
     if not os.path.isfile(idea_file):
-        print(f"Error: No conversation found with ID '{args.id}'", file=sys.stderr)
+        print(
+            f"Error: No conversation found with ID '{args.id}'",
+            file=sys.stderr
+        )
         sys.exit(1)
 
     try:
@@ -25,8 +28,10 @@ def rename_idea(args):
         with open(idea_file, "w", encoding="utf-8") as f:
             json.dump(idea, f, indent=2)
 
-        print(f"Renamed idea '{args.id}' from:\n  {old_subject}\nto:\n  {args.target}")
+        print(
+            f"Renamed idea '{args.id}' from:\n  {old_subject}\nto:\n  {args.target}"
+        )
 
-    except Exception as e:
+    except (IOError, OSError, json.JSONDecodeError) as e:
         print(f"Error renaming idea: {e}", file=sys.stderr)
         sys.exit(1)

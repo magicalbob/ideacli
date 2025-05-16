@@ -1,3 +1,5 @@
+"""Repository utilities for ideacli."""
+
 import os
 import sys
 import subprocess
@@ -16,7 +18,11 @@ def resolve_idea_path(args):
     ideas_repo_path = os.path.join(base_path, IDEAS_REPO)
 
     if not os.path.isdir(ideas_repo_path):
-        print(f"Error: No ideas repository found at '{ideas_repo_path}'. Please initialize one with 'ideacli init'.", file=sys.stderr)
+        print(
+            f"Error: No ideas repository found at '{ideas_repo_path}'. "
+            "Please initialize one with 'ideacli init'.",
+            file=sys.stderr
+        )
         sys.exit(1)
 
     return ideas_repo_path
@@ -26,33 +32,35 @@ def ensure_repo(args):
     return resolve_idea_path(args)
 
 def init_repo(args):
-    """Initialize a new ideas repository"""
-    path = args.path if args.path else IDEAS_REPO
+    """Initialize a new ideas repository."""
+    path = args.path if hasattr(args, "path") and args.path else IDEAS_REPO
 
     if os.path.exists(path):
         if not os.path.exists(os.path.join(path, ".git")):
             print(f"Directory {path} exists but is not a git repository.")
             return False
-        else:
-            print(f"Repository already exists at {path}")
-            return True
+        print(f"Repository already exists at {path}")
+        return True
 
     try:
         os.makedirs(path, exist_ok=True)
         subprocess.run(["git", "init"], cwd=path, check=True)
 
-        # ✅ Add back these two lines:
         os.makedirs(os.path.join(path, "conversations"), exist_ok=True)
         with open(os.path.join(path, "README.md"), "w", encoding="utf-8") as f:
             f.write("# LLM Conversations Repository\n\nManaged by ideacli\n")
 
         subprocess.run(["git", "add", "."], cwd=path, check=True)
-        subprocess.run(["git", "commit", "-m", "Initial repository structure"], cwd=path, check=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Initial repository structure"],
+            cwd=path,
+            check=True
+        )
 
         print(f"Initialized new ideas repository in {path}")
         return True
 
-    except Exception as e:
+    except (OSError, subprocess.CalledProcessError) as e:
         print(f"Error initializing repository: {e}")
         return False
 
@@ -71,9 +79,11 @@ def status(args):
 
     print("Git Status:")
     try:
-        output = subprocess.check_output(["git", "status"], cwd=path, text=True)
+        output = subprocess.check_output(
+            ["git", "status"], cwd=path, text=True
+        )
         print(output)
-    except Exception as e:
+    except (OSError, subprocess.CalledProcessError) as e:
         print(f"Error getting repository status: {e}", file=sys.stderr)
         return False
 
