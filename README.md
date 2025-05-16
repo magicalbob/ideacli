@@ -1,4 +1,5 @@
 # ideacli - LLM Conversations Manager
+[![PyPI version](https://badge.fury.io/py/ideacli.svg)](https://badge.fury.io/py/ideacli)
 
 > **Note:** For details on our focused proof-of-concept (POC) approach and implementation plan, please see [POC-APPROACH.md](POC-APPROACH.md).
 
