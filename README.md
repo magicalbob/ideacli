@@ -96,12 +96,122 @@ Let use see the count.
 # More commands coming soon...
 ```
 
+## Using `prompt-template.json` for Flexible File Generation
+
+### What is `prompt-template.json`?
+
+`prompt-template.json` is a configuration file that defines the structure and instructions for how LLMs (Large Language Models) should respond to your `ideacli enquire` requests. It acts as a *contract* between you and the LLM, ensuring that responses are in a machine-readable JSON format and contain exactly the files and data you need.
+
+### Where does it live?
+
+Place your `prompt-template.json` in the **root** of your project directory (typically alongside your `.ideas_repo` and source folders). `ideacli enquire` will automatically pick it up and use it to generate LLM prompts.
+
+* * * * *
+
+### Flexible File Generation with LLMs
+
+With the right `prompt-template.json`, you can specify *any* set of output files---Python code, Markdown docs, configs, tests, etc.---in a single LLM round-trip.
+
+#### How it Works
+
+-   The prompt template defines the **structure and constraints** of LLM responses.
+
+-   `ideacli enquire` uses this template to generate a JSON prompt, which is put on your clipboard, ready for pasting into your LLM of choice (e.g., ChatGPT, Claude, Gemini).
+
+-   The LLM's response, in turn, can be parsed by `ideacli update` and its files extracted to your project.
+
+* * * * *
+
+#### Example: Recommended Generalized Template
+
+Below is a flexible `prompt-template.json` you can use for almost any file-generation task:
+
+```json
+{
+  "format_instructions": {
+    "description": "Please respond ONLY with a valid JSON object, containing an object property named 'files' whose keys are filenames (with appropriate extensions), and whose values are the full file contents as strings. Include a property 'approaches' describing your methodology and a 'conclusion' summarizing the output.",
+    "expected_structure": {
+      "approaches": {
+        "description": "Approach methodology for creating the requested files"
+      },
+      "files": {
+        "example.py": "# Python file content here",
+        "example.json": "{\"title\": \"Story\", \"content\": \"...\"}",
+        "README.md": "# Documentation here"
+      },
+      "conclusion": "Summary of the provided files"
+    },
+    "important_notes": [
+      "Your entire response must be a valid JSON object",
+      "The 'files' property must include a file for each requested topic",
+      "Each file must have content appropriate for its extension",
+      "Do not include any text outside the JSON structure"
+    ]
+  }
+}
+```
+
+* * * * *
+
+#### Example Workflow
+
+1.  **Edit or create your `prompt-template.json`** as above, tailored for your desired output files.
+
+2.  **Run:**
+
+```bash
+ideacli enquire --prompt "Create a Python MVP for the Unspiked app. Please output: app.py (Flask app), requirements.txt, README.md." --id myproj1
+```
+
+3.  **Paste the generated prompt into your LLM** (such as ChatGPT or Claude).
+
+4.  **Copy the LLM's JSON response** to your clipboard.
+
+5.  **Run:**
+
+```bash
+ideacli update --id myproj1
+ideacli files --id myproj1
+ideacli extract --id myproj1
+```
+
+6.  You'll now have real files: `app.py`, `requirements.txt`, `README.md`, etc., with content generated directly by the LLM.
+
+---
+
+#### Tips
+
+-   Be explicit in your prompt about filenames and formats; the LLM will follow your lead.
+
+-   You can generate multi-file Python projects, config folders, tests, or documentation in one go.
+
+-   Update your template or prompt for more advanced cases (e.g., subdirectories, extra constraints).
+
+-   You may keep multiple `prompt-template.json` variants for different workflows.
+
+---
+
+#### Why this Works
+
+-   The generalized template gives the LLM maximum flexibility and you maximum control over the resulting project structure and content.
+
+-   The process is robust, extensible, and works with any modern AI assistant.
+
+-   `prompt-template.json` is the key to unlocking this power---customize it to suit your project or team conventions.
+
+---
+
+**What happens if prompt-template.json is missing?**\
+If prompt-template.json is absent from your project, ideacli enquire will generate a basic prompt containing only your own request text (with no format instructions or schema).
+This is fine for informal use, but to reliably automate file extraction and multi-file workflows, you should provide an explicit template.
+A present and well-formed prompt-template.json ensures LLM outputs are always in a predictable, machine-readable format for the update and extract steps.
+
 ## Next Steps
 - ~Complete the 'add' verb with ID generation~
 - ~Add a show command (R from CRUD)~
 - ~Add an enquire command. Display the current idea as a JSON object with an extra prompt to tell the LLM what is required. Place the JSON in the paste buffer ready for copying to the chosen LLM(s). (one version of U from CRUD)~
 - ~Add an update command. Take info from the paste buffer and use it to update an idea. This is the stage after an enquire (where the LLM has responded to the enquiry. Implies that as well as the prompt added by the enquire, the enquire should also include context in its JSON output to ensure [as much as one can] that the LLM's reply will include the idea Id). (the second part of the U from CRUD).~
-- Add a delete command to delete a particular idea. This could be a hard or sof delete? Either completely removing the idea from .ideas_repo or just marking that it is no longer being pursued?
+- Add a delete command to delete a particular idea. This could be a hard or soft delete? Either completely removing the idea from .ideas_repo or just marking that it is no longer being pursued?
 - Implement optional agile object types:
   - Add configuration to enable/disable "agile mode" for a repository
   - Support agile object types (epic, story, task, subtask) with appropriate metadata
