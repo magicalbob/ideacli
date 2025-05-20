@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ideacli"
+version = "0.1.2"
+description = "CLI tool for managing LLM conversation ideas"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "GPL-3.0"}
+authors = [
+    {name = "magicalbob", email = "ian.ellis@ellisbs.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Development Status :: 4 - Beta",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    "setuptools>=80",
+    "pyperclip>=1.9.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.1",
+    "coverage>=7.8",
+    "pylint>=3.3.7",
+    "build>=1.0",
+    "twine>=5.0",
+    "pypistats>=1.10.0"
+]
+
+[project.scripts]
+ideacli = "ideacli.cli:main"
+
+[project.urls]
+"Homepage" = "https://github.com/magicalbob/ideacli"
+"Bug Tracker" = "https://github.com/magicalbob/ideacli/issues"
+
+[tool.setuptools]
+packages = ["ideacli"]
+package-dir = {"" = "src"}

@@ -1,0 +1,23 @@
+{
+  "format_instructions": {
+    "description": "Please respond ONLY with a valid JSON object, containing an object property named 'files' whose keys are filenames (with appropriate extensions), and whose values are the full file contents as strings. Include a property 'approaches' describing your methodology and a 'conclusion' summarizing the output.",
+    "expected_structure": {
+      "approaches": {
+        "description": "Approach methodology for creating the requested files"
+      },
+      "files": {
+        "example.py": "# Python file content here",
+        "example.json": "{\"title\": \"Story\", \"content\": \"...\"}",
+        "README.md": "# Documentation here"
+      },
+      "conclusion": "Summary of the provided files"
+    },
+    "important_notes": [
+      "Your entire response must be a valid JSON object",
+      "The 'files' property must include a file for each requested topic",
+      "Each file must have content appropriate for its extension",
+      "Do not include any text outside the JSON structure"
+    ]
+  }
+}
+
