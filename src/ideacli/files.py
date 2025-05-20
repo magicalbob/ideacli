@@ -26,7 +26,7 @@ def list_files(args):
             files.update(files_data.keys())
 
     if files:
-        print("\n".join(files))
+        print("\n".join(sorted(files)))
     else:
         print("No files found in idea response.")
 
