@@ -11,6 +11,7 @@ from ideacli.update import update_idea
 from ideacli.files import list_files, extract_files
 from ideacli.rename import rename_idea
 from ideacli.importer import import_idea
+from ideacli.rm import remove_file
 
 def main():
     """Main entry point for the ideacli command."""
@@ -43,6 +44,8 @@ def main():
         print(f"ideacli version {__version__}")
     elif args.command == 'import':
         import_idea(args)
+    elif args.command == 'rm':
+        remove_file(args)
     else:
         parser.print_help()
 
@@ -113,6 +116,12 @@ def create_parser():
     import_parser.add_argument('--id', required=True, help='ID of the idea to import into')
     import_parser.add_argument('--path', help='Custom path to ideas repository')
     import_parser.add_argument('--force', action='store_true', help='Force overwrite if file already exists')
+
+    # rm command
+    rm_parser = subparsers.add_parser('rm', help='Remove a file from an idea')
+    rm_parser.add_argument('--id', required=True, help='ID of the idea to remove a file from')
+    rm_parser.add_argument('file_name', help='Name of the file to remove')
+    rm_parser.add_argument('--path', help='Custom path to ideas repository')
 
     return parser
 
