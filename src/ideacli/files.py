@@ -6,7 +6,7 @@ import sys
 from ideacli.repository import resolve_idea_path
 
 def list_files(args):
-    """List file paths associated with a conversation (uses 'path' attribute if present)."""
+    """List filenames (with relative paths, if available) associated with a conversation."""
     repo_path = resolve_idea_path(args)
     idea_file = os.path.join(repo_path, "conversations", f"{args.id}.json")
 
@@ -17,38 +17,45 @@ def list_files(args):
     with open(idea_file, encoding="utf-8") as f:
         idea = json.load(f)
 
-    filepaths = set()
+    files = set()
 
-    # Helper to extract files from a 'files' dict
-    def extract_filepaths(files_data):
-        if isinstance(files_data, dict):
-            for fname, fileobj in files_data.items():
-                # Handle new format: fileobj is a dict with 'content' and 'path'
-                if isinstance(fileobj, dict):
-                    path = (fileobj.get("path") or "").strip()
-                    if path and not path.endswith("/"):
-                        path += "/"
-                    full_path = f"{path}{fname}" if path else fname
-                    filepaths.add(full_path)
-                # Legacy: fileobj is a string (just content, no path)
-                elif isinstance(fileobj, str):
-                    filepaths.add(fname)
-        elif isinstance(files_data, list):
-            for file_entry in files_data:
-                if isinstance(file_entry, dict):
-                    fname = file_entry.get("name")
-                    path = (file_entry.get("path") or "").strip()
-                    if path and not path.endswith("/"):
-                        path += "/"
-                    full_path = f"{path}{fname}" if path else fname
-                    filepaths.add(full_path)
+    # Helper to add path+filename, defaulting to just filename
+    def add_file(file_dict):
+        if isinstance(file_dict, dict):
+            for fname, fobj in file_dict.items():
+                # New format: fobj is dict with 'content' and 'path'
+                if isinstance(fobj, dict):
+                    path = (fobj.get("path") or "").strip()
+                    # Normalize the path, avoid double slashes, handle "" or "."
+                    if path in ("", "."):
+                        files.add(fname)
+                    else:
+                        if not path.endswith("/"):
+                            path += "/"
+                        files.add(f"{path}{fname}")
+                # Legacy: fobj is just content string
+                elif isinstance(fobj, str):
+                    files.add(fname)
+                # Unexpected: ignore/skip
+        elif isinstance(file_dict, list):
+            for entry in file_dict:
+                if isinstance(entry, dict):
+                    fname = entry.get("name")
+                    path = (entry.get("path") or "").strip()
+                    if fname:
+                        if path in ("", "."):
+                            files.add(fname)
+                        else:
+                            if not path.endswith("/"):
+                                path += "/"
+                            files.add(f"{path}{fname}")
 
-    # Look in root files and response.files
-    extract_filepaths(idea.get("files"))
-    extract_filepaths(idea.get("response", {}).get("files"))
+    # Collect files from response and root-level
+    add_file(idea.get("response", {}).get("files"))
+    add_file(idea.get("files"))
 
-    if filepaths:
-        print("\n".join(sorted(filepaths)))
+    if files:
+        print("\n".join(sorted(files)))
     else:
         print("No files found in idea response.")
 
