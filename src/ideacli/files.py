@@ -6,7 +6,7 @@ import sys
 from ideacli.repository import resolve_idea_path
 
 def list_files(args):
-    """List filenames (with relative paths, if available) associated with a conversation."""
+    """List filenames with paths associated with a conversation."""
     repo_path = resolve_idea_path(args)
     idea_file = os.path.join(repo_path, "conversations", f"{args.id}.json")
 
@@ -19,62 +19,38 @@ def list_files(args):
 
     files = set()
 
-    # Helper to add path+filename, defaulting to just filename
-    def add_file(file_dict):
-        if isinstance(file_dict, dict):
-            for fname, fobj in file_dict.items():
-                # New format: fobj is dict with 'content' and 'path'
-                if isinstance(fobj, dict):
-                    path = (fobj.get("path") or "").strip()
-                    # Normalize the path, avoid double slashes, handle "" or "."
-                    if path in ("", "."):
-                        files.add(fname)
-                    else:
-                        if not path.endswith("/"):
-                            path += "/"
-                        files.add(f"{path}{fname}")
-                # Legacy: fobj is just content string
-                elif isinstance(fobj, str):
-                    files.add(fname)
-                # Unexpected: ignore/skip
-        elif isinstance(file_dict, list):
-            for entry in file_dict:
-                if isinstance(entry, dict):
-                    fname = entry.get("name")
-                    path = (entry.get("path") or "").strip()
-                    if fname:
-                        if path in ("", "."):
-                            files.add(fname)
-                        else:
-                            if not path.endswith("/"):
-                                path += "/"
-                            files.add(f"{path}{fname}")
+    # Helper to extract filename+path from a file_obj
+    def extract_file_path(filename, file_obj):
+        if isinstance(file_obj, dict):
+            pth = (file_obj.get("path") or "").strip()
+            if pth and not pth.endswith("/"):
+                pth += "/"
+            return f"{pth}{filename}" if pth else filename
+        elif isinstance(file_obj, str):
+            return filename
+        return None
 
-    # Collect files from response and root-level
-    add_file(idea.get("response", {}).get("files"))
-    add_file(idea.get("files"))
+    # Collect file names from both 'response' and root-level 'files'
+    for files_data in (idea.get("response", {}).get("files"), idea.get("files")):
+        if isinstance(files_data, dict):
+            for filename, file_obj in files_data.items():
+                relpath = extract_file_path(filename, file_obj)
+                if relpath:
+                    files.add(relpath)
 
     if files:
         print("\n".join(sorted(files)))
     else:
         print("No files found in idea response.")
 
-def _write_file(filename, file_obj):
+def _write_file(filename, content, path=""):
     """Write content to filename, creating directories as needed."""
-    # If file_obj is a dict (new format), extract path/content
-    if isinstance(file_obj, dict):
-        content = file_obj.get("content", "")
-        path = (file_obj.get("path") or "").strip()
-        if path and path not in ("", "."):
-            actual_path = os.path.join(path, filename)
-        else:
-            actual_path = filename
-    # If file_obj is a string (legacy format)
-    elif isinstance(file_obj, str):
-        content = file_obj
-        actual_path = filename
+    if isinstance(content, bytes):
+        content = content.decode('utf-8')
+    if path and path not in ("", "."):
+        actual_path = os.path.join(path, filename)
     else:
-        raise ValueError(f"File object for {filename} is of unsupported type: {type(file_obj)}")
+        actual_path = filename
     dir_name = os.path.dirname(actual_path)
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
@@ -87,21 +63,33 @@ def _extract_from_files_data(files_data):
     extracted = False
     if isinstance(files_data, dict):
         for filename, file_obj in files_data.items():
-            _write_file(filename, file_obj)
-            extracted = True
+            if isinstance(file_obj, str):
+                # Legacy: value is just content
+                _write_file(filename, file_obj)
+                extracted = True
+            elif isinstance(file_obj, dict) and "content" in file_obj:
+                # New style: {content: ..., path: ...}
+                content = file_obj["content"]
+                path = (file_obj.get("path") or "").strip()
+                if isinstance(content, dict):
+                    content = json.dumps(content, indent=2)
+                _write_file(filename, content, path)
+                extracted = True
+            else:
+                # Non-file, skip with a message
+                print(f"Skipping non-file entry '{filename}' (type: {type(file_obj).__name__})")
+                continue
     elif isinstance(files_data, list):
         for file_entry in files_data:
             if isinstance(file_entry, dict):
-                fname = file_entry.get("name")
+                file_name = file_entry.get("name")
+                content = file_entry.get("content")
                 path = (file_entry.get("path") or "").strip()
-                content = file_entry.get("content", "")
-                # Compose actual_path
-                if path and path not in ("", "."):
-                    actual_path = os.path.join(path, fname)
-                else:
-                    actual_path = fname
-                _write_file(actual_path, content)
-                extracted = True
+                if isinstance(content, dict):
+                    content = json.dumps(content, indent=2)
+                if file_name and content is not None:
+                    _write_file(file_name, content, path)
+                    extracted = True
     return extracted
 
 def _extract_from_approaches(approaches):
@@ -116,7 +104,6 @@ def _extract_from_approaches(approaches):
                     _write_file(file_path, code)
                     extracted = True
     return extracted
-
 
 def extract_files(args):
     """Extract code samples into real files from an idea conversation."""
