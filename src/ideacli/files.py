@@ -5,6 +5,8 @@ import os
 import sys
 from ideacli.repository import resolve_idea_path
 
+SKIP_FILE_KEYS = {"state", "prompt", "last_prompt", "response", "files_needed"}
+
 def list_files(args):
     """List filenames with paths associated with a conversation."""
     repo_path = resolve_idea_path(args)
@@ -63,12 +65,15 @@ def _extract_from_files_data(files_data):
     extracted = False
     if isinstance(files_data, dict):
         for filename, file_obj in files_data.items():
+            # --- Skip keys that are not actual files ---
+            if filename in SKIP_FILE_KEYS:
+                continue
+            # Legacy: value is just file content
             if isinstance(file_obj, str):
-                # Legacy: value is just content
                 _write_file(filename, file_obj)
                 extracted = True
+            # New format: dict with at least 'content'
             elif isinstance(file_obj, dict) and "content" in file_obj:
-                # New style: {content: ..., path: ...}
                 content = file_obj["content"]
                 path = (file_obj.get("path") or "").strip()
                 if isinstance(content, dict):
@@ -76,8 +81,7 @@ def _extract_from_files_data(files_data):
                 _write_file(filename, content, path)
                 extracted = True
             else:
-                # Non-file, skip with a message
-                print(f"Skipping non-file entry '{filename}' (type: {type(file_obj).__name__})")
+                # Not a file; skip with message (quietly)
                 continue
     elif isinstance(files_data, list):
         for file_entry in files_data:
@@ -85,9 +89,9 @@ def _extract_from_files_data(files_data):
                 file_name = file_entry.get("name")
                 content = file_entry.get("content")
                 path = (file_entry.get("path") or "").strip()
-                if isinstance(content, dict):
-                    content = json.dumps(content, indent=2)
                 if file_name and content is not None:
+                    if isinstance(content, dict):
+                        content = json.dumps(content, indent=2)
                     _write_file(file_name, content, path)
                     extracted = True
     return extracted
