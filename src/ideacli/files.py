@@ -5,9 +5,8 @@ import os
 import sys
 from ideacli.repository import resolve_idea_path
 
-
 def list_files(args):
-    """List filenames associated with a conversation."""
+    """List file paths associated with a conversation (uses 'path' attribute if present)."""
     repo_path = resolve_idea_path(args)
     idea_file = os.path.join(repo_path, "conversations", f"{args.id}.json")
 
@@ -18,18 +17,40 @@ def list_files(args):
     with open(idea_file, encoding="utf-8") as f:
         idea = json.load(f)
 
-    files = set()
+    filepaths = set()
 
-    # Collect file names from both 'response' and root-level 'files'
-    for files_data in (idea.get("response", {}).get("files"), idea.get("files")):
+    # Helper to extract files from a 'files' dict
+    def extract_filepaths(files_data):
         if isinstance(files_data, dict):
-            files.update(files_data.keys())
+            for fname, fileobj in files_data.items():
+                # Handle new format: fileobj is a dict with 'content' and 'path'
+                if isinstance(fileobj, dict):
+                    path = (fileobj.get("path") or "").strip()
+                    if path and not path.endswith("/"):
+                        path += "/"
+                    full_path = f"{path}{fname}" if path else fname
+                    filepaths.add(full_path)
+                # Legacy: fileobj is a string (just content, no path)
+                elif isinstance(fileobj, str):
+                    filepaths.add(fname)
+        elif isinstance(files_data, list):
+            for file_entry in files_data:
+                if isinstance(file_entry, dict):
+                    fname = file_entry.get("name")
+                    path = (file_entry.get("path") or "").strip()
+                    if path and not path.endswith("/"):
+                        path += "/"
+                    full_path = f"{path}{fname}" if path else fname
+                    filepaths.add(full_path)
 
-    if files:
-        print("\n".join(sorted(files)))
+    # Look in root files and response.files
+    extract_filepaths(idea.get("files"))
+    extract_filepaths(idea.get("response", {}).get("files"))
+
+    if filepaths:
+        print("\n".join(sorted(filepaths)))
     else:
         print("No files found in idea response.")
-
 
 def _write_file(filename, content):
     """Write content to filename, creating directories as needed."""
