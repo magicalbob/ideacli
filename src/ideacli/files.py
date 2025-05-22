@@ -59,33 +59,50 @@ def list_files(args):
     else:
         print("No files found in idea response.")
 
-def _write_file(filename, content):
+def _write_file(filename, file_obj):
     """Write content to filename, creating directories as needed."""
-    dir_name = os.path.dirname(filename)
+    # If file_obj is a dict (new format), extract path/content
+    if isinstance(file_obj, dict):
+        content = file_obj.get("content", "")
+        path = (file_obj.get("path") or "").strip()
+        if path and path not in ("", "."):
+            actual_path = os.path.join(path, filename)
+        else:
+            actual_path = filename
+    # If file_obj is a string (legacy format)
+    elif isinstance(file_obj, str):
+        content = file_obj
+        actual_path = filename
+    else:
+        raise ValueError(f"File object for {filename} is of unsupported type: {type(file_obj)}")
+    dir_name = os.path.dirname(actual_path)
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
-    with open(filename, "w", encoding="utf-8") as out_file:
+    with open(actual_path, "w", encoding="utf-8") as out_file:
         out_file.write(content)
-    print(f"Wrote {filename}")
-
+    print(f"Wrote {actual_path}")
 
 def _extract_from_files_data(files_data):
     """Extract files from a files dict or list structure."""
     extracted = False
     if isinstance(files_data, dict):
-        for filename, content in files_data.items():
-            _write_file(filename, content)
+        for filename, file_obj in files_data.items():
+            _write_file(filename, file_obj)
             extracted = True
     elif isinstance(files_data, list):
         for file_entry in files_data:
             if isinstance(file_entry, dict):
-                file_name = file_entry.get("name")
-                content = file_entry.get("content")
-                if file_name and content:
-                    _write_file(file_name, content)
-                    extracted = True
+                fname = file_entry.get("name")
+                path = (file_entry.get("path") or "").strip()
+                content = file_entry.get("content", "")
+                # Compose actual_path
+                if path and path not in ("", "."):
+                    actual_path = os.path.join(path, fname)
+                else:
+                    actual_path = fname
+                _write_file(actual_path, content)
+                extracted = True
     return extracted
-
 
 def _extract_from_approaches(approaches):
     """Extract files from approaches code_samples."""
