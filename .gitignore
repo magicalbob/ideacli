@@ -4,3 +4,4 @@ src/ideacli.egg-info/
 .coverage
 venv
 dist
+tmp
