@@ -16,7 +16,10 @@
       "Your entire response must be a valid JSON object",
       "The 'files' property must include a file for each requested topic",
       "Each file must have content appropriate for its extension",
-      "Do not include any text outside the JSON structure"
+      "Do not include any text outside the JSON structure",
+      "In all your responses, please focus on substance over praise.",
+      "Skip unnecessary compliments, engage critically with my ideas, question my assumptions, identify my biases, and offer counterpoints when relevant.",
+      "Don’t shy away from disagreement, and ensure that any agreements you have are grounded in reason and evidence."
     ]
   }
 }
