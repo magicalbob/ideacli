@@ -4,44 +4,73 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ideacli"
-version = "0.1.2"
-description = "CLI tool for managing LLM conversation ideas"
+version = "0.1.3"
+description = "A command-line tool for curating and managing ideas"
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "GPL-3.0"}
 authors = [
-    {name = "magicalbob", email = "ian.ellis@ellisbs.com"}
+    {name = "Your Name", email = "ellisiana@gmail.com"}
 ]
+maintainers = [
+    {name = "Your Name", email = "ellisiana@gmail.com"}
+]
+# Use SPDX license expression instead of deprecated table format
+license = "GPL-3.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.8"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Development Status :: 4 - Beta",
-    "Topic :: Software Development :: Libraries :: Python Modules",
     "Intended Audience :: Developers",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
 ]
+keywords = ["ideas", "cli", "productivity", "notes", "brainstorming"]
 dependencies = [
-    "setuptools>=80",
-    "pyperclip>=1.9.0"
+    "click>=8.0.0",
+    "rich>=10.0.0",
+    "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.3",
-    "pytest-cov>=6.1",
-    "coverage>=7.8",
-    "pylint>=3.3.7",
-    "build>=1.0",
-    "twine>=5.0",
-    "pypistats>=1.10.0"
+    "pytest>=6.0.0",
+    "pytest-cov>=2.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.910",
 ]
+
+[project.urls]
+Homepage = "https://github.com/magicalbob/ideacli"
+"Bug Reports" = "https://github.com/magicalbob/ideacli/issues"
+"Source" = "https://github.com/magicalbob/ideacli"
 
 [project.scripts]
 ideacli = "ideacli.cli:main"
 
-[project.urls]
-"Homepage" = "https://github.com/magicalbob/ideacli"
-"Bug Tracker" = "https://github.com/magicalbob/ideacli/issues"
-
 [tool.setuptools]
-packages = ["ideacli"]
 package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.mypy]
+python_version = "0.1.3"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
